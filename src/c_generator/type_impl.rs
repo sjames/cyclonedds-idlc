@@ -71,10 +71,10 @@ lazy_static! {
 impl Type for IdlTypeSpec {
     fn get_meta_op(&self, name: &str, struct_name: &str, is_key_field: bool) -> String {
         match self {
-            IdlTypeSpec::ArrayType(typespec, values) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::SequenceType(typespec, value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::StringType(value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::WideStringType(value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ArrayType(_typespec, _values) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::SequenceType(_typespec, _value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::StringType(_value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::WideStringType(_value) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::F32Type => FLOAT.get_meta_op(name, struct_name, is_key_field),
             IdlTypeSpec::F64Type => DOUBLE.get_meta_op(name, struct_name, is_key_field),
             IdlTypeSpec::F128Type => String::from("NOT IMPLEMENTED"),
@@ -88,16 +88,16 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::WideCharType => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::BooleanType => BOOLEAN.get_meta_op(name, struct_name, is_key_field),
             IdlTypeSpec::OctetType => OCTET.get_meta_op(name, struct_name, is_key_field),
-            IdlTypeSpec::ScopedName(name) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ScopedName(_name) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::None => panic!("Unexpected get_meta_op for IdlTypeSpec::None"),
         }
     }
     fn get_sub_op(&self) -> String {
         match self {
-            IdlTypeSpec::ArrayType(typespec, values) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::SequenceType(typespec, value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::StringType(value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::WideStringType(value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ArrayType(_typespec, _values) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::SequenceType(_typespec, _value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::StringType(_value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::WideStringType(_value) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::F32Type => FLOAT.get_sub_op(),
             IdlTypeSpec::F64Type => DOUBLE.get_sub_op(),
             IdlTypeSpec::F128Type => String::from("NOT IMPLEMENTED"),
@@ -111,16 +111,16 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::WideCharType => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::BooleanType => BOOLEAN.get_sub_op(),
             IdlTypeSpec::OctetType => OCTET.get_sub_op(),
-            IdlTypeSpec::ScopedName(name) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ScopedName(_name) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::None => panic!("Unexpected get_meta_op for IdlTypeSpec::None"),
         }
     }
     fn get_op(&self) -> String {
         match self {
-            IdlTypeSpec::ArrayType(typespec, values) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::SequenceType(typespec, value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::StringType(value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::WideStringType(value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ArrayType(_typespec, _values) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::SequenceType(_typespec, _value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::StringType(_value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::WideStringType(_value) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::F32Type => FLOAT.get_op(),
             IdlTypeSpec::F64Type => DOUBLE.get_op(),
             IdlTypeSpec::F128Type => String::from("NOT IMPLEMENTED"),
@@ -134,16 +134,16 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::WideCharType => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::BooleanType => BOOLEAN.get_op(),
             IdlTypeSpec::OctetType => OCTET.get_op(),
-            IdlTypeSpec::ScopedName(name) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ScopedName(_name) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::None => panic!("Unexpected get_meta_op for IdlTypeSpec::None"),
         }
     }
     fn get_c_type(&self) -> String {
         match self {
-            IdlTypeSpec::ArrayType(typespec, values) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::SequenceType(typespec, value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::StringType(value) => STRING.get_c_type(),
-            IdlTypeSpec::WideStringType(value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ArrayType(_typespec, _values) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::SequenceType(_typespec, _value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::StringType(_value) => STRING.get_c_type(),
+            IdlTypeSpec::WideStringType(_value) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::F32Type => FLOAT.get_c_type(),
             IdlTypeSpec::F64Type => DOUBLE.get_c_type(),
             IdlTypeSpec::F128Type => String::from("NOT IMPLEMENTED"),
@@ -157,16 +157,16 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::WideCharType => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::BooleanType => BOOLEAN.get_c_type(),
             IdlTypeSpec::OctetType => OCTET.get_c_type(),
-            IdlTypeSpec::ScopedName(name) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ScopedName(_name) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::None => panic!("Unexpected get_meta_op for IdlTypeSpec::None"),
         }
     }
     fn get_xml(&self) -> String {
         match self {
-            IdlTypeSpec::ArrayType(typespec, values) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::SequenceType(typespec, value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::StringType(value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::WideStringType(value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ArrayType(_typespec, _values) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::SequenceType(_typespec, _value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::StringType(_value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::WideStringType(_value) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::F32Type => FLOAT.get_xml(),
             IdlTypeSpec::F64Type => DOUBLE.get_xml(),
             IdlTypeSpec::F128Type => String::from("NOT IMPLEMENTED"),
@@ -180,7 +180,7 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::WideCharType => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::BooleanType => BOOLEAN.get_xml(),
             IdlTypeSpec::OctetType => OCTET.get_xml(),
-            IdlTypeSpec::ScopedName(name) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ScopedName(_name) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::None => panic!("Unexpected get_meta_op for IdlTypeSpec::None"),
         }
     }

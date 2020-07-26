@@ -15,7 +15,7 @@ use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::io::{Read, Write};
 
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 
 use crate::ast::*;
 
