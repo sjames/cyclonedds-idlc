@@ -15,7 +15,7 @@ use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::io::{Read, Write};
 
-use std::path::{PathBuf};
+use std::path::PathBuf;
 
 use crate::ast::*;
 
@@ -30,6 +30,7 @@ pub enum IdlError {
     ExpectedItem(Rule),
     ErrorMesg(String),
     FileNotFound(String),
+    KeyNotFound(String),
 }
 
 ///
@@ -143,15 +144,21 @@ impl<'i> Context<'i> {
         Ok(())
     }
 
-    fn add_other_directive(&mut self, _scope: &mut Scope, directive: &str) -> Result<(), IdlError> {
-        let mut directive = directive.split(" ");
+    fn add_other_directive(&mut self, scope: &mut Scope, directive: &str) -> Result<(), IdlError> {
+        let mut directive = directive.trim_end().split(" ");
 
-        if let (Some("#pragma"), Some("keylist")) = (directive.next(), directive.next()) {
+        if let (Some("#pragma"), Some("keylist"), Some(struct_name)) =
+            (directive.next(), directive.next(), directive.next())
+        {
+            let mut keys: Vec<String> = Vec::new();
             while let Some(key) = directive.next() {
-                println!("Key: {}", key);
+                //println!("Key: {}", key);
+                keys.push(key.into());
             }
+            let current_module = self.lookup_module(scope);
+            current_module.set_topic_and_key_flags(struct_name, &keys)?;
         } else {
-            println!("Ignoring unknown directive");
+            //println!("Ignoring unknown directive");
         }
 
         Ok(())
@@ -249,6 +256,7 @@ impl<'i> Context<'i> {
                 let member_dcl = Box::new(IdlStructMember {
                     id: id,
                     type_spec: type_spec.clone(),
+                    is_key: false,
                 });
 
                 Ok(member_dcl)
@@ -270,6 +278,7 @@ impl<'i> Context<'i> {
                 let member_dcl = Box::new(IdlStructMember {
                     id: id,
                     type_spec: array_type_spec,
+                    is_key: false,
                 });
 
                 Ok(member_dcl)
@@ -565,7 +574,7 @@ impl<'i> Context<'i> {
                 let m2 = m1?;
                 let members = m2.into_iter().flatten().collect::<Vec<_>>();
 
-                let typedcl = Box::new(IdlTypeDcl(IdlTypeDclKind::StructDcl(id, members)));
+                let typedcl = Box::new(IdlTypeDcl(IdlTypeDclKind::StructDcl(id, members, false)));
                 self.add_type_dcl(scope, key, typedcl)
             }
 

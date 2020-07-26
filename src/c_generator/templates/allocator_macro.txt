@@ -1,0 +1,5 @@
+#define <SCOPED_NAME>__alloc() \
+((<SCOPED_NAME>*) dds_alloc (sizeof (<SCOPED_NAME>)));
+
+#define <SCOPED_NAME>_free(d,o) \
+dds_sample_free ((d), &<SCOPED_NAME>_desc, (o))

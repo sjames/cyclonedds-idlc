@@ -2,6 +2,7 @@
 //
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0>
+use crate::IdlError;
 use linked_hash_map::LinkedHashMap;
 use std::io::Error;
 use std::io::Write;
@@ -162,6 +163,7 @@ impl Default for IdlValueExpr {
 pub struct IdlStructMember {
     pub id: String,
     pub type_spec: Box<IdlTypeSpec>,
+    pub is_key: bool,
 }
 
 ///
@@ -324,7 +326,7 @@ impl Default for IdlTypeSpec {
 pub enum IdlTypeDclKind {
     None,
     TypeDcl(String, Box<IdlTypeSpec>),
-    StructDcl(String, Vec<Box<IdlStructMember>>),
+    StructDcl(String, Vec<Box<IdlStructMember>>, bool),
     UnionDcl(String, Box<IdlTypeSpec>, Vec<IdlSwitchCase>),
     EnumDcl(String, Vec<String>),
 }
@@ -376,7 +378,7 @@ impl IdlTypeDcl {
                 let _ = writeln!(out, ";");
                 Ok(())
             }
-            IdlTypeDclKind::StructDcl(ref id, ref type_spec) => {
+            IdlTypeDclKind::StructDcl(ref id, ref type_spec, _) => {
                 // TODO collect/return result
                 let _ = writeln!(out, "");
                 let _ = writeln!(out, "{:indent$}//", "", indent = level * INDENTION);
@@ -601,6 +603,43 @@ impl IdlModule {
             types: LinkedHashMap::default(),
             constants: LinkedHashMap::default(),
             keys: Vec::new(),
+        }
+    }
+
+    pub fn set_topic_and_key_flags(
+        &mut self,
+        struct_name: &str,
+        keys: &Vec<String>,
+    ) -> Result<(), IdlError> {
+        let mut struct_found = false;
+        let mut keys_found = 0;
+        for (_name, decl) in &mut self.types {
+            //println!("Name:{}",name);
+            match decl.0 {
+                IdlTypeDclKind::StructDcl(ref name, ref mut members, ref mut is_key) => {
+                    if name == struct_name {
+                        *is_key = true;
+                        struct_found = true;
+                        //println!("{} is a topic",&struct_name);
+                        for key in keys {
+                            for ref mut member in members.iter_mut() {
+                                if key == &member.id {
+                                    member.is_key = true;
+                                    keys_found = keys_found + 1;
+                                    //println!("{} is a key",&member.id);
+                                }
+                            }
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+        if struct_found && keys_found == keys.len() {
+            Ok(())
+        } else {
+            println!("Error!");
+            Err(IdlError::KeyNotFound(String::from(keys.join(","))))
         }
     }
 
