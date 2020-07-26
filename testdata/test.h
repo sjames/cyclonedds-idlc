@@ -31,6 +31,8 @@ typedef struct TestData_Msg
   uint8_t octet_field;
   char * string_field;
   dds_sequence_t sequence_field;
+  int16_t array_field[25];
+  float twod_array_field[25][30];
 } TestData_Msg;
 
 extern const dds_topic_descriptor_t TestData_Msg_desc;
@@ -40,6 +42,14 @@ extern const dds_topic_descriptor_t TestData_Msg_desc;
 
 #define TestData_Msg_free(d,o) \
 dds_sample_free ((d), &TestData_Msg_desc, (o))
+
+
+typedef struct TestData_CommonStruct
+{
+  char * global_name;
+  bool enabled;
+} TestData_CommonStruct;
+
 
 
 typedef struct TestData_Inner_InnerMsg
@@ -54,6 +64,7 @@ typedef struct TestData_Inner_TopicMsg
 {
   TestData_Inner_InnerMsg inner_msg;
   char * topicID;
+  TestData_CommonStruct common;
 } TestData_Inner_TopicMsg;
 
 extern const dds_topic_descriptor_t TestData_Inner_TopicMsg_desc;

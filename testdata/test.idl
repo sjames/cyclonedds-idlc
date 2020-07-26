@@ -12,9 +12,17 @@ module TestData
     boolean bool_field;
     octet octet_field;
     string string_field;
-    sequence <octet> sequence_field;
+    sequence <string> sequence_field;
+    short array_field[25];
+    float twod_array_field[25][30];
   };
   #pragma keylist Msg short_field long_field string_field
+
+  struct CommonStruct
+  {
+     string global_name;
+     boolean enabled;
+  };
 
   module Inner 
   {
@@ -28,6 +36,7 @@ module TestData
     {
        InnerMsg inner_msg;
        string topicID;
+       ::TestData::CommonStruct common;
        
     };
     #pragma keylist TopicMsg topicID

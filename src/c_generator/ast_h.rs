@@ -1,9 +1,10 @@
-use crate::{IdlModule, IdlStructMember, IdlTypeDcl, IdlTypeDclKind};
+use crate::{IdlModule, IdlStructMember, IdlTypeDcl, IdlTypeDclKind, IdlTypeSpec};
 
 use std::io::Error;
 use std::io::Write;
 
 use crate::c_generator::{INDENTION, scoped_name};
+use crate::c_generator::type_trait::Type;
 
 impl IdlModule {
     // Write C header file
@@ -62,7 +63,7 @@ impl IdlTypeDcl {
 
                 for member in members {
                     let _ = write!(out, "{:indent$} ", "", indent = (0 + 1) * INDENTION)
-                        .and_then(|_| member.as_ref().write_h(out, 0 + 1))
+                        .and_then(|_| member.as_ref().write_h(out, 0 + 1, scope))
                         .and_then(|_| writeln!(out));
                 }
 
@@ -119,8 +120,33 @@ impl IdlTypeDcl {
 
 impl IdlStructMember {
     ///
-    pub fn write_h<W: Write>(&self, out: &mut W, _level: usize) -> Result<(), Error> {
-        self.type_spec.write_h(out)?;
-        write!(out, " {};", self.id)
+    pub fn write_h<W: Write>(&self, out: &mut W, level: usize, scope: &Vec<String>) -> Result<(), Error> {
+        match self.type_spec.as_ref() {
+            IdlTypeSpec::ArrayType(spec,values) => {
+                // Array types in c are different. The array size comes after the id
+                self.type_spec.write_h(out)?;
+                write!(out, " {}", self.id)?;
+                for value in values {
+                    write!(out, "[")?;
+                    value.write(out) ?;
+                    write!(out, "]")?;
+                }
+                write!(out, ";")
+            }
+            IdlTypeSpec::ScopedName(name) => {
+                let is_absolute_path = name.1;
+                if !is_absolute_path {
+                    out.write(&scope.join("_").as_bytes())?;
+                    write!(out,"_")?;
+                } 
+                self.type_spec.write_h(out)?;
+                write!(out, " {};", self.id)
+            }
+            _=> {
+                self.type_spec.write_h(out)?;
+                write!(out, " {};", self.id)
+            }
+        }
     }
 }
+
