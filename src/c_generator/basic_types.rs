@@ -38,7 +38,6 @@ pub struct BasicType {
     subop: &'static str,
     align: Alignment,
     xml: &'static str,
-    is_key: bool,
 }
 
 impl BasicType {
@@ -50,7 +49,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_BOO",
             align: Alignment::new(AlignmentType::Bool),
             xml: "Boolean",
-            is_key: false,
         }
     }
     pub fn new_octet() -> Self {
@@ -61,7 +59,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_1BY",
             align: Alignment::new(AlignmentType::One),
             xml: "Octet",
-            is_key: false,
         }
     }
     pub fn new_char() -> Self {
@@ -72,7 +69,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_1BY | DDS_OP_FLAG_SGN",
             align: Alignment::new(AlignmentType::One),
             xml: "Char",
-            is_key: false,
         }
     }
     pub fn new_short() -> Self {
@@ -83,7 +79,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_2BY | DDS_OP_FLAG_SGN",
             align: Alignment::new(AlignmentType::Two),
             xml: "Short",
-            is_key: false,
         }
     }
     pub fn new_ushort() -> Self {
@@ -94,7 +89,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_2BY",
             align: Alignment::new(AlignmentType::Two),
             xml: "UShort",
-            is_key: false,
         }
     }
     pub fn new_long() -> Self {
@@ -106,7 +100,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_4BY | DDS_OP_FLAG_SGN",
             align: Alignment::new(AlignmentType::Four),
             xml: "Long",
-            is_key: false,
         }
     }
     pub fn new_ulong() -> Self {
@@ -118,7 +111,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_4BY",
             align: Alignment::new(AlignmentType::Four),
             xml: "ULong",
-            is_key: false,
         }
     }
     pub fn new_longlong() -> Self {
@@ -130,7 +122,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_8BY | DDS_OP_FLAG_SGN",
             align: Alignment::new(AlignmentType::Eight),
             xml: "LongLong",
-            is_key: false,
         }
     }
     pub fn new_ulonglong() -> Self {
@@ -142,7 +133,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_8BY",
             align: Alignment::new(AlignmentType::Eight),
             xml: "ULongLong",
-            is_key: false,
         }
     }
     pub fn new_float() -> Self {
@@ -154,7 +144,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_4BY | DDS_OP_FLAG_FP",
             align: Alignment::new(AlignmentType::Four),
             xml: "Float",
-            is_key: false,
         }
     }
     pub fn new_double() -> Self {
@@ -166,7 +155,6 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_8BY | DDS_OP_FLAG_FP",
             align: Alignment::new(AlignmentType::Eight),
             xml: "Double",
-            is_key: false,
         }
     }
     pub fn new_string() -> Self {
@@ -178,24 +166,9 @@ impl BasicType {
             subop: "DDS_OP_SUBTYPE_STR",
             align: Alignment::new(AlignmentType::Ptr),
             xml: "String",
-            is_key: false,
         }
     }
 }
-
-/*
-public ArrayList <String> getMetaOp (String myname, String structname)
-  {
-    ArrayList <String> result = new ArrayList <String> (1);
-    result.add (new String
-    (
-      "DDS_OP_ADR | " + type.op + (isKeyField () ? " | DDS_OP_FLAG_KEY" : "") +
-      ", offsetof (" + structname + ", " + myname + ")"
-    ));
-    return result;
-  }
-
-*/
 
 impl Type for BasicType {
     fn get_meta_op(&self, name: &str, struct_name: &str, is_key: bool) -> String {

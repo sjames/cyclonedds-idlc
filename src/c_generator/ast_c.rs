@@ -4,7 +4,6 @@ use crate::{IdlModule, IdlStructMember, IdlTypeDcl, IdlTypeDclKind};
 use std::io::Error;
 use std::io::Write;
 
-const INDENTION: usize = 4;
 
 impl IdlModule {
     // Write C header file
@@ -33,8 +32,10 @@ impl IdlModule {
 impl IdlTypeDcl {
     pub fn write_c<W: Write>(&mut self, out: &mut W, scope: &Vec<String>) -> Result<(), Error> {
         match self.0 {
-            IdlTypeDclKind::StructDcl(ref id, ref members, _) => {
-                //typedef struct HelloWorldData_Msg
+            IdlTypeDclKind::StructDcl(ref id, ref members, is_key) => {
+                if is_key {
+                    
+                }
 
                 Ok(())
             }

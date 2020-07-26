@@ -3,7 +3,7 @@ use crate::{IdlModule, IdlStructMember, IdlTypeDcl, IdlTypeDclKind};
 use std::io::Error;
 use std::io::Write;
 
-const INDENTION: usize = 4;
+use crate::c_generator::{INDENTION, scoped_name};
 
 impl IdlModule {
     // Write C header file
@@ -51,12 +51,6 @@ impl IdlModule {
     EnumDcl(String, Vec<String>),
 */
 
-fn scoped_name(scope: &Vec<String>, id: &str) -> String {
-    let mut name = scope.join("_");
-    name.push_str("_");
-    name.push_str(id);
-    String::from(name)
-}
 
 impl IdlTypeDcl {
     pub fn write_h<W: Write>(&mut self, out: &mut W, scope: &Vec<String>) -> Result<(), Error> {

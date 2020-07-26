@@ -1,0 +1,35 @@
+module TestData
+{
+  struct Msg
+  {
+    short short_field;
+    long long_field;
+    unsigned short ushort_field;
+    unsigned long ulong_field;
+    float float_field;
+    double double_field;
+    char char_field;
+    boolean bool_field;
+    octet octet_field;
+    string string_field;
+    sequence <octet> sequence_field;
+  };
+  #pragma keylist Msg short_field long_field string_field
+
+  module Inner 
+  {
+    struct InnerMsg
+    {
+       long userID;
+       string message;
+    };
+
+    struct TopicMsg
+    {
+       InnerMsg inner_msg;
+       string topicID;
+       
+    };
+    #pragma keylist TopicMsg topicID
+  };
+};
