@@ -67,9 +67,12 @@ fn main() -> Result<(), std::io::Error> {
         "Predefine 'name' as a macro, with definition 1.",
         "name",
     );
+
     opts.optopt("o", "", "Write output to 'outfile'.", "outfile");
     opts.optflag("v", "", "Verbose output for debugging'.");
+    opts.optflag("c", "cfiles", "Generate C files");
     opts.optflag("h", "help", "print this help menu");
+
     let args: Vec<_> = env::args().collect();
     let program = args[0].clone();
     let matches = match opts.parse(&args[1..]) {
@@ -105,7 +108,13 @@ fn main() -> Result<(), std::io::Error> {
     let data = load_from(&env::current_dir().unwrap(), &infile)
         .map_err(|_| Error::new(ErrorKind::NotFound, ""))?;
 
-    let config = Configuration::new(defs, matches.opt_present("v"));
+    let fullname = &env::current_dir().unwrap().join(&infile);
+    let config = Configuration::new(
+        defs,
+        matches.opt_present("v"),
+        matches.opt_present("c"),
+        fullname.to_path_buf(),
+    );
 
     let result = match matches.opt_str("o") {
         Some(outfile) => {

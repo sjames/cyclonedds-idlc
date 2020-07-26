@@ -4,11 +4,8 @@
 // http://www.apache.org/licenses/LICENSE-2.0>
 extern crate linked_hash_map;
 
-mod alignment;
 mod ast;
-mod basic_types;
-mod cyclonedds_meta;
-mod type_trait;
+mod c_generator;
 
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
@@ -17,6 +14,8 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::io::{Read, Write};
+
+use std::path::{Path, PathBuf};
 
 use crate::ast::*;
 
@@ -43,14 +42,23 @@ pub trait IdlLoader {
 pub struct Configuration {
     pub definition: HashMap<String, String>,
     pub verbose: bool,
+    pub generate_c: bool,
+    pub idl_name: PathBuf,
 }
 
 ///
 impl Configuration {
-    pub fn new(defs: HashMap<String, String>, verbose: bool) -> Configuration {
+    pub fn new(
+        defs: HashMap<String, String>,
+        verbose: bool,
+        gen_c: bool,
+        idl_name: PathBuf,
+    ) -> Configuration {
         Configuration {
             definition: defs,
             verbose: verbose,
+            generate_c: gen_c,
+            idl_name,
         }
     }
 }
@@ -61,6 +69,8 @@ impl Default for Configuration {
         Configuration {
             definition: HashMap::default(),
             verbose: false,
+            generate_c: false,
+            idl_name: PathBuf::default(),
         }
     }
 }
@@ -825,11 +835,44 @@ pub fn generate_with_loader<W: Write, L: IdlLoader>(
         let _ = ctx.process::<L>(&mut scope, loader, &p);
     }
 
-    let _ = out.write(MODULE_PRELUDE);
-    ctx.root_module
-        .as_mut()
-        .write(out, 0)
-        .map_err(|_| IdlError::InternalError)
+    if config.generate_c {
+        let idlnamestem = String::from(config.idl_name.file_stem().unwrap().to_str().unwrap());
+        let idlname = config.idl_name.file_name().unwrap().to_str().unwrap();
+
+        let mut header_name = idlnamestem.clone();
+        header_name.push_str(".h");
+
+        let file_header = std::include_str!("c_generator/templates/file_header.txt")
+            .replace("<FILENAME>", &header_name)
+            .replace("<IDLNAME>", idlname)
+            .replace(
+                "<HEADERDEFINE>",
+                &crate::c_generator::header_macro_name(&idlnamestem),
+            );
+        let _ = out.write(file_header.as_bytes());
+
+        let hfile_footer = std::include_str!("c_generator/templates/h_file_footer.txt").replace(
+            "<HEADERDEFINE>",
+            &crate::c_generator::header_macro_name(&idlnamestem),
+        );
+
+        let scope = Vec::new();
+
+        ctx.root_module
+            .as_mut()
+            .write_h(out, &scope)
+            .map_err(|_| IdlError::InternalError)?;
+
+        out.write(hfile_footer.as_bytes())
+            .map(|_| ())
+            .map_err(|e| IdlError::ErrorMesg(e.to_string()))
+    } else {
+        let _ = out.write(MODULE_PRELUDE);
+        ctx.root_module
+            .as_mut()
+            .write(out, 0)
+            .map_err(|_| IdlError::InternalError)
+    }
 }
 
 #[derive(Debug, Clone, Default)]

@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum AlignmentType {
     One,
     Bool,
@@ -11,7 +11,7 @@ pub enum AlignmentType {
     Ptr,
     Eight,
 }
-
+#[derive(Clone)]
 pub struct Alignment {
     alignment: AlignmentType,
     value: u32,
@@ -71,6 +71,14 @@ impl Alignment {
                 rendering: "8u",
             },
         }
+    }
+
+    pub fn get_value(&self) -> i32 {
+        self.value as i32
+    }
+
+    pub fn get_ordering(&self) -> i32 {
+        self.ordering as i32
     }
 
     pub fn to_str(&self) -> &'static str {

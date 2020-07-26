@@ -13,7 +13,8 @@ DOUBLE ("double", "DDS_OP_TYPE_8BY | DDS_OP_FLAG_FP", "DDS_OP_SUBTYPE_8BY | DDS_
 STRING ("char *", "DDS_OP_TYPE_STR", "DDS_OP_SUBTYPE_STR", Alignment.PTR, "String");
 */
 
-use crate::alignment::{Alignment, AlignmentType};
+use crate::c_generator::alignment::{Alignment, AlignmentType};
+use crate::c_generator::type_trait::Type;
 
 enum BType {
     Boolean,
@@ -30,141 +31,212 @@ enum BType {
     String,
 }
 
-pub struct BT {
+pub struct BasicType {
     basic_type: BType,
     ctype: &'static str,
     op: &'static str,
     subop: &'static str,
     align: Alignment,
     xml: &'static str,
+    is_key: bool,
 }
 
-impl BT {
+impl BasicType {
     pub fn new_boolean() -> Self {
-        BT {
+        BasicType {
             basic_type: BType::Boolean,
             ctype: "bool",
             op: "DDS_OP_TYPE_BOO",
             subop: "DDS_OP_SUBTYPE_BOO",
             align: Alignment::new(AlignmentType::Bool),
             xml: "Boolean",
+            is_key: false,
         }
     }
     pub fn new_octet() -> Self {
-        BT {
+        BasicType {
             basic_type: BType::Octet,
             ctype: "uint8_t",
             op: "DDS_OP_TYPE_1BY",
             subop: "DDS_OP_SUBTYPE_1BY",
             align: Alignment::new(AlignmentType::One),
             xml: "Octet",
+            is_key: false,
         }
     }
     pub fn new_char() -> Self {
-        BT {
+        BasicType {
             basic_type: BType::Char,
             ctype: "char",
             op: "DDS_OP_TYPE_1BY | DDS_OP_FLAG_SGN",
             subop: "DDS_OP_SUBTYPE_1BY | DDS_OP_FLAG_SGN",
             align: Alignment::new(AlignmentType::One),
             xml: "Char",
+            is_key: false,
         }
     }
     pub fn new_short() -> Self {
-        BT {
+        BasicType {
             basic_type: BType::Short,
             ctype: "int16_t",
             op: "DDS_OP_TYPE_2BY | DDS_OP_FLAG_SGN",
             subop: "DDS_OP_SUBTYPE_2BY | DDS_OP_FLAG_SGN",
             align: Alignment::new(AlignmentType::Two),
             xml: "Short",
+            is_key: false,
         }
     }
     pub fn new_ushort() -> Self {
-        BT {
+        BasicType {
             basic_type: BType::UShort,
             ctype: "uint16_t",
             op: "DDS_OP_TYPE_2BY",
             subop: "DDS_OP_SUBTYPE_2BY",
             align: Alignment::new(AlignmentType::Two),
             xml: "UShort",
+            is_key: false,
         }
     }
     pub fn new_long() -> Self {
         //LONG ("int32_t", "DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN", "DDS_OP_SUBTYPE_4BY | DDS_OP_FLAG_SGN", Alignment.FOUR, "Long"),
-        BT {
+        BasicType {
             basic_type: BType::Long,
             ctype: "int32_t",
             op: "DDS_OP_TYPE_4BY | DDS_OP_FLAG_SGN",
             subop: "DDS_OP_SUBTYPE_4BY | DDS_OP_FLAG_SGN",
             align: Alignment::new(AlignmentType::Four),
             xml: "Long",
+            is_key: false,
         }
     }
     pub fn new_ulong() -> Self {
         //ULONG ("uint32_t", "DDS_OP_TYPE_4BY", "DDS_OP_SUBTYPE_4BY", Alignment.FOUR, "ULong"),
-        BT {
+        BasicType {
             basic_type: BType::ULong,
             ctype: "uint32_t",
             op: "DDS_OP_TYPE_4BY",
             subop: "DDS_OP_SUBTYPE_4BY",
             align: Alignment::new(AlignmentType::Four),
             xml: "ULong",
+            is_key: false,
         }
     }
     pub fn new_longlong() -> Self {
         //LONGLONG ("int64_t", "DDS_OP_TYPE_8BY | DDS_OP_FLAG_SGN", "DDS_OP_SUBTYPE_8BY | DDS_OP_FLAG_SGN", Alignment.EIGHT, "LongLong"),
-        BT {
+        BasicType {
             basic_type: BType::LongLong,
             ctype: "int64_t",
             op: "DDS_OP_TYPE_8BY | DDS_OP_FLAG_SGN",
             subop: "DDS_OP_SUBTYPE_8BY | DDS_OP_FLAG_SGN",
             align: Alignment::new(AlignmentType::Eight),
             xml: "LongLong",
+            is_key: false,
         }
     }
     pub fn new_ulonglong() -> Self {
         //ULONGLONG ("uint64_t", "DDS_OP_TYPE_8BY", "DDS_OP_SUBTYPE_8BY", Alignment.EIGHT, "ULongLong"),
-        BT {
+        BasicType {
             basic_type: BType::ULongLong,
             ctype: "uint64_t",
             op: "DDS_OP_TYPE_8BY",
             subop: "DDS_OP_SUBTYPE_8BY",
             align: Alignment::new(AlignmentType::Eight),
             xml: "ULongLong",
+            is_key: false,
         }
     }
     pub fn new_float() -> Self {
         //FLOAT ("float", "DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP", "DDS_OP_SUBTYPE_4BY | DDS_OP_FLAG_FP", Alignment.FOUR, "Float"),
-        BT {
+        BasicType {
             basic_type: BType::Float,
             ctype: "float",
             op: "DDS_OP_TYPE_4BY | DDS_OP_FLAG_FP",
             subop: "DDS_OP_SUBTYPE_4BY | DDS_OP_FLAG_FP",
             align: Alignment::new(AlignmentType::Four),
             xml: "Float",
+            is_key: false,
         }
     }
     pub fn new_double() -> Self {
         //DOUBLE ("double", "DDS_OP_TYPE_8BY | DDS_OP_FLAG_FP", "DDS_OP_SUBTYPE_8BY | DDS_OP_FLAG_FP", Alignment.EIGHT, "Double"),
-        BT {
+        BasicType {
             basic_type: BType::Double,
             ctype: "double",
             op: "DDS_OP_TYPE_8BY | DDS_OP_FLAG_FP",
             subop: "DDS_OP_SUBTYPE_8BY | DDS_OP_FLAG_FP",
             align: Alignment::new(AlignmentType::Eight),
             xml: "Double",
+            is_key: false,
         }
     }
     pub fn new_string() -> Self {
         //STRING ("char *", "DDS_OP_TYPE_STR", "DDS_OP_SUBTYPE_STR", Alignment.PTR, "String");
-        BT {
+        BasicType {
             basic_type: BType::String,
             ctype: "char *",
             op: "DDS_OP_TYPE_STR",
             subop: "DDS_OP_SUBTYPE_STR",
             align: Alignment::new(AlignmentType::Ptr),
             xml: "String",
+            is_key: false,
         }
+    }
+}
+
+/*
+public ArrayList <String> getMetaOp (String myname, String structname)
+  {
+    ArrayList <String> result = new ArrayList <String> (1);
+    result.add (new String
+    (
+      "DDS_OP_ADR | " + type.op + (isKeyField () ? " | DDS_OP_FLAG_KEY" : "") +
+      ", offsetof (" + structname + ", " + myname + ")"
+    ));
+    return result;
+  }
+
+*/
+
+impl Type for BasicType {
+    fn get_meta_op(&self, name: &str, struct_name: &str, is_key: bool) -> String {
+        String::from(format!(
+            "DDS_OP_ADR | {} {} , offsetof ({},{})",
+            self.op,
+            if is_key { " | DDS_OP_FLAG_KEY" } else { "" },
+            struct_name,
+            name
+        ))
+    }
+    fn get_sub_op(&self) -> String {
+        self.subop.into()
+    }
+    fn get_op(&self) -> String {
+        self.op.into()
+    }
+
+    fn get_c_type(&self) -> String {
+        self.ctype.into()
+    }
+
+    fn get_xml(&self) -> String {
+        String::from(format!("<{}/>", self.xml))
+    }
+
+    fn get_key_size(&self) -> i32 {
+        match self.basic_type {
+            BType::Boolean => 1,
+            BType::String => -1,
+            _ => self.align.get_value(),
+        }
+    }
+
+    fn get_meta_op_size(&self) -> i32 {
+        2
+    }
+    fn get_alignment(&self) -> Alignment {
+        self.align.clone()
+    }
+    fn contains_union(&self) -> bool {
+        false
     }
 }

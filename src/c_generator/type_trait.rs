@@ -17,18 +17,16 @@ public interface Type
   public boolean containsUnion ();
 }
 */
-use crate::alignment::Alignment;
+use crate::c_generator::alignment::Alignment;
 
 pub trait Type {
-    fn get_meta_op(name: &str, struct_name: &str) -> Vec<String>;
-    fn get_sub_op() -> String;
-    fn get_op() -> String;
-    fn get_c_type() -> String;
-    fn get_xml() -> String;
-    fn make_key_field();
-    fn is_key_field() -> bool;
-    fn get_key_size() -> u32;
-    fn get_meta_op_size() -> u32;
-    fn get_alignment() -> Alignment;
-    fn contains_union() -> bool;
+    fn get_meta_op(&self, name: &str, struct_name: &str, is_key_field: bool) -> String;
+    fn get_sub_op(&self) -> String;
+    fn get_op(&self) -> String;
+    fn get_c_type(&self) -> String;
+    fn get_xml(&self) -> String;
+    fn get_key_size(&self) -> i32;
+    fn get_meta_op_size(&self) -> i32;
+    fn get_alignment(&self) -> Alignment;
+    fn contains_union(&self) -> bool;
 }
