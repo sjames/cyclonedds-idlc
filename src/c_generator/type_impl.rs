@@ -5,6 +5,7 @@ use crate::{IdlModule, IdlScopedName, IdlTypeDclKind, IdlTypeSpec};
 
 use std::io::Error;
 use std::io::Write;
+use std::ops::Deref;
 
 use lazy_static::lazy_static;
 
@@ -200,9 +201,47 @@ impl Type for IdlTypeSpec {
 
     fn get_meta_op_size(&self, root: &IdlModule) -> i32 {
         match self {
-            IdlTypeSpec::ArrayType(_typespec, _values) => 0,
-            IdlTypeSpec::SequenceType(_typespec, _value) => 0,
-            IdlTypeSpec::StringType(_value) => 0,
+            IdlTypeSpec::ArrayType(typespec, _values) => {
+                match (*typespec).deref() {
+                    IdlTypeSpec::StringType(_) => 5,
+                    IdlTypeSpec::ScopedName(name) => {
+                        if let Some(t) = root.get_type_decl(name) {
+                            match &t.0 {
+                                IdlTypeDclKind::StructDcl(_id, members, _is_key) => {
+                                    let sum = members
+                                        .iter()
+                                        .fold(0, |sum, x| sum + x.type_spec.get_meta_op_size(root));
+                                    6 + sum
+                                }
+                                _ => panic!("Unsupported Scoped name:{:?}", name),
+                            }
+                        } else {
+                            panic!("Unable to find type decl for scoped name:{:?}", name);
+                        }
+                    }
+                    _ => 1 + typespec.get_meta_op_size(root), // basic types
+                }
+            }
+            IdlTypeSpec::SequenceType(typespec, _value) => match (*typespec).deref() {
+                IdlTypeSpec::StringType(_) => 2,
+                IdlTypeSpec::ScopedName(name) => {
+                    if let Some(t) = root.get_type_decl(name) {
+                        match &t.0 {
+                            IdlTypeDclKind::StructDcl(_id, members, _is_key) => {
+                                let sum = members
+                                    .iter()
+                                    .fold(0, |sum, x| sum + x.type_spec.get_meta_op_size(root));
+                                5 + sum
+                            }
+                            _ => panic!("Unsupported Scoped name:{:?}", name),
+                        }
+                    } else {
+                        panic!("Unable to find type decl for scoped name:{:?}", name);
+                    }
+                }
+                _ => typespec.get_meta_op_size(root),
+            },
+            IdlTypeSpec::StringType(_value) => STRING.get_meta_op_size(root),
             IdlTypeSpec::WideStringType(_value) => 0,
             IdlTypeSpec::F32Type => FLOAT.get_meta_op_size(root),
             IdlTypeSpec::F64Type => DOUBLE.get_meta_op_size(root),

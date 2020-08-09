@@ -450,7 +450,8 @@ impl IdlTypeDcl {
                     let num_keys = type_spec.iter().filter(|m| m.is_key).count();
                     let num_ops = type_spec
                         .iter()
-                        .fold(0, |acc, x| acc + x.type_spec.get_meta_op_size(root));
+                        .fold(0, |acc, x| acc + x.type_spec.get_meta_op_size(root))
+                        + 1;
 
                     let _ = writeln!(
                         out,
@@ -704,7 +705,7 @@ impl IdlModule {
                 if k == modname {
                     v.get_type_decl_rec(&scoped_name[1..])
                 } else {
-                    println!("Not found module:{} cmp with {}",modname,k);
+                    println!("Not found module:{} cmp with {}", modname, k);
                     None
                 }
             });
