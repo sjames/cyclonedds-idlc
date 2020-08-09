@@ -3,7 +3,7 @@ mod ast_c;
 mod ast_h;
 mod basic_types;
 mod type_impl;
-mod type_trait;
+pub mod type_trait;
 
 pub const INDENTION: usize = 4;
 

@@ -7,6 +7,8 @@ use linked_hash_map::LinkedHashMap;
 use std::io::Error;
 use std::io::Write;
 
+use crate::c_generator::type_trait::Type;
+
 ///
 #[derive(Clone, Debug)]
 pub enum UnaryOp {
@@ -290,9 +292,11 @@ impl IdlTypeSpec {
             IdlTypeSpec::StringType(_) => write!(out, "String"),
             // TODO implement String/Sequence bounds for serializer and deserialzer
             IdlTypeSpec::WideStringType(_) => write!(out, "String"),
+            IdlTypeSpec::SequenceType(_, _) => write!(out, "dds_sequence_t"),
+            /*
             IdlTypeSpec::SequenceType(typ_expr, _) => write!(out, "Vec<")
                 .and_then(|_| typ_expr.as_ref().write(out))
-                .and_then(|_| write!(out, ">")),
+                .and_then(|_| write!(out, ">")),*/
             IdlTypeSpec::ArrayType(typ_expr, dim_expr_list) => {
                 for _ in dim_expr_list {
                     let _ = write!(out, "[");
@@ -346,7 +350,12 @@ pub struct IdlTypeDcl(pub IdlTypeDclKind);
 impl IdlTypeDcl {
     ///
     ///
-    pub fn write<W: Write>(&mut self, out: &mut W, level: usize) -> Result<(), Error> {
+    pub fn write<W: Write>(
+        &self,
+        out: &mut W,
+        level: usize,
+        root: &IdlModule,
+    ) -> Result<(), Error> {
         match self.0 {
             IdlTypeDclKind::TypeDcl(ref id, ref type_spec) => {
                 // TODO collect/return result
@@ -378,7 +387,7 @@ impl IdlTypeDcl {
                 let _ = writeln!(out, ";");
                 Ok(())
             }
-            IdlTypeDclKind::StructDcl(ref id, ref type_spec, _) => {
+            IdlTypeDclKind::StructDcl(ref id, ref type_spec, is_key) => {
                 // TODO collect/return result
                 let _ = writeln!(out, "");
                 let _ = writeln!(out, "{:indent$}//", "", indent = level * INDENTION);
@@ -424,7 +433,75 @@ impl IdlTypeDcl {
                         .and_then(|_| member.as_ref().write(out, level + 1))
                         .and_then(|_| writeln!(out));
                 }
+
                 let _ = writeln!(out, "{:indent$}{}", "", "}", indent = level * INDENTION);
+
+                // Implementation needed only for key structures
+                if is_key {
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}pub struct {}_desc {}",
+                        "",
+                        id,
+                        "{",
+                        indent = level * INDENTION
+                    );
+
+                    let num_keys = type_spec.iter().filter(|m| m.is_key).count();
+                    let num_ops = type_spec
+                        .iter()
+                        .fold(0, |acc, x| acc + x.type_spec.get_meta_op_size(root));
+
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}key_descriptor : [dds_key_descriptor;{}],",
+                        "",
+                        num_keys,
+                        indent = (level + 1) * INDENTION
+                    );
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}ops : [u32;{}],",
+                        "",
+                        num_ops,
+                        indent = (level + 1) * INDENTION
+                    );
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}{}",
+                        "",
+                        "descriptor : dds_topic_descriptor,",
+                        indent = (level + 1) * INDENTION
+                    );
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}{}",
+                        "",
+                        "_pin: PhantomPinned,",
+                        indent = (level + 1) * INDENTION
+                    );
+                    let _ = writeln!(out, "{:indent$}{}", "", "}", indent = level * INDENTION);
+
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}{}",
+                        "",
+                        "//Implementation",
+                        indent = level * INDENTION
+                    );
+
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}impl {} {}",
+                        "",
+                        id,
+                        "{",
+                        indent = level * INDENTION
+                    );
+
+                    let _ = writeln!(out, "{:indent$}{}", "", "}", indent = level * INDENTION);
+                }
+
                 Ok(())
             }
 
@@ -542,6 +619,10 @@ impl IdlTypeDcl {
             _ => Ok(()),
         }
     }
+
+    pub fn get_num_ops() -> usize {
+        5
+    }
 }
 
 ///
@@ -556,7 +637,12 @@ pub struct IdlConstDcl {
 impl IdlConstDcl {
     ///
     ///
-    pub fn write<W: Write>(&mut self, out: &mut W, level: usize) -> Result<(), Error> {
+    pub fn write<W: Write>(
+        &self,
+        out: &mut W,
+        level: usize,
+        root: &IdlModule,
+    ) -> Result<(), Error> {
         writeln!(
             out,
             "{:indent$}{}",
@@ -606,6 +692,35 @@ impl IdlModule {
         }
     }
 
+    fn get_type_decl_rec(&self, scoped_name: &[String]) -> Option<&Box<IdlTypeDcl>> {
+        if scoped_name.len() == 1 {
+            return self
+                .types
+                .iter()
+                .find_map(|(k, v)| if *k == scoped_name[0] { Some(v) } else { None });
+        } else if scoped_name.len() > 1 {
+            let modname = &scoped_name[0];
+            let module = self.modules.iter().find_map(|(k, v)| {
+                if k == modname {
+                    v.get_type_decl_rec(&scoped_name[1..])
+                } else {
+                    println!("Not found module:{} cmp with {}",modname,k);
+                    None
+                }
+            });
+            module
+        } else {
+            println!("Not found:{:?}", scoped_name);
+
+            None
+        }
+    }
+
+    pub fn get_type_decl(&self, scoped_name: &IdlScopedName) -> Option<&Box<IdlTypeDcl>> {
+        // absolute path
+        self.get_type_decl_rec(&scoped_name.0)
+    }
+
     pub fn set_topic_and_key_flags(
         &mut self,
         struct_name: &str,
@@ -623,6 +738,7 @@ impl IdlModule {
                         //println!("{} is a topic",&struct_name);
                         for key in keys {
                             for ref mut member in members.iter_mut() {
+                                //println!("Member:{}",&member.id);
                                 if key == &member.id {
                                     member.is_key = true;
                                     keys_found = keys_found + 1;
@@ -635,15 +751,20 @@ impl IdlModule {
                 _ => {}
             }
         }
-        if struct_found && keys_found == keys.len() {
+        if struct_found && (keys_found == keys.len()) {
             Ok(())
         } else {
-            println!("Error!");
+            println!("Error! : Keys not found: {}", String::from(keys.join(",")));
             Err(IdlError::KeyNotFound(String::from(keys.join(","))))
         }
     }
 
-    pub fn write<W: Write>(&mut self, out: &mut W, level: usize) -> Result<(), Error> {
+    pub fn write<W: Write>(
+        &self,
+        out: &mut W,
+        level: usize,
+        root: &IdlModule,
+    ) -> Result<(), Error> {
         let _prolog = match self.id {
             Some(ref id_str) => writeln!(
                 out,
@@ -678,16 +799,16 @@ impl IdlModule {
         //.and_then(|_| writeln!(out, "{:indent$}{}", "",
         //                       IMPORT_SERDE, indent = (level + add) * INDENTION));
 
-        for typ in self.types.entries() {
-            typ.into_mut().write(out, level + add)?;
+        for (_, typ) in self.types.iter() {
+            typ.write(out, level + add, root)?;
         }
 
-        for module in self.modules.entries() {
-            module.into_mut().write(out, level + add)?;
+        for (_, module) in self.modules.iter() {
+            module.write(out, level + add, root)?;
         }
 
-        for cnst in self.constants.entries() {
-            cnst.into_mut().write(out, level + add)?;
+        for (_, cnst) in self.constants.iter() {
+            cnst.write(out, level + add, root)?;
         }
 
         let _epilog = match self.id {

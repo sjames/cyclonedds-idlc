@@ -3,7 +3,7 @@ module TestData
   struct Msg
   {
     short short_field;
-    long long_field;
+    long Long_field;
     unsigned short ushort_field;
     unsigned long ulong_field;
     float float_field;
@@ -16,7 +16,7 @@ module TestData
     short array_field[25];
     float twod_array_field[25][30];
   };
-  #pragma keylist Msg short_field long_field string_field
+  #pragma keylist Msg short_field Long_field string_field
 
   struct CommonStruct
   {
@@ -34,7 +34,7 @@ module TestData
 
     struct TopicMsg
     {
-       InnerMsg inner_msg;
+       ::TestData::Inner::InnerMsg inner_msg;
        string topicID;
        ::TestData::CommonStruct common;
        

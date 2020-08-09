@@ -868,8 +868,7 @@ pub fn generate_with_loader<W: Write, L: IdlLoader>(
         let scope = Vec::new();
 
         ctx.root_module
-            .as_mut()
-            .write_h(out, &scope)
+            .write_h(out, &scope, &ctx.root_module)
             .map_err(|_| IdlError::InternalError)?;
 
         out.write(hfile_footer.as_bytes())
@@ -878,8 +877,7 @@ pub fn generate_with_loader<W: Write, L: IdlLoader>(
     } else {
         let _ = out.write(MODULE_PRELUDE);
         ctx.root_module
-            .as_mut()
-            .write(out, 0)
+            .write(out, 0, &ctx.root_module)
             .map_err(|_| IdlError::InternalError)
     }
 }

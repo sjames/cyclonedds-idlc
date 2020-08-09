@@ -4,7 +4,6 @@ use crate::{IdlModule, IdlStructMember, IdlTypeDcl, IdlTypeDclKind};
 use std::io::Error;
 use std::io::Write;
 
-
 impl IdlModule {
     // Write C header file
     pub fn write_c<W: Write>(&mut self, out: &mut W, scope: &Vec<String>) -> Result<(), Error> {
@@ -33,9 +32,7 @@ impl IdlTypeDcl {
     pub fn write_c<W: Write>(&mut self, out: &mut W, scope: &Vec<String>) -> Result<(), Error> {
         match self.0 {
             IdlTypeDclKind::StructDcl(ref id, ref members, is_key) => {
-                if is_key {
-                    
-                }
+                if is_key {}
 
                 Ok(())
             }

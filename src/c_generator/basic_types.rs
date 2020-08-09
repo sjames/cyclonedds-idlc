@@ -15,6 +15,7 @@ STRING ("char *", "DDS_OP_TYPE_STR", "DDS_OP_SUBTYPE_STR", Alignment.PTR, "Strin
 
 use crate::c_generator::alignment::{Alignment, AlignmentType};
 use crate::c_generator::type_trait::Type;
+use crate::IdlModule;
 
 enum BType {
     Boolean,
@@ -171,7 +172,7 @@ impl BasicType {
 }
 
 impl Type for BasicType {
-    fn get_meta_op(&self, name: &str, struct_name: &str, is_key: bool) -> String {
+    fn get_meta_op(&self, name: &str, struct_name: &str, is_key: bool, root: &IdlModule) -> String {
         String::from(format!(
             "DDS_OP_ADR | {} {} , offsetof ({},{})",
             self.op,
@@ -180,22 +181,22 @@ impl Type for BasicType {
             name
         ))
     }
-    fn get_sub_op(&self) -> String {
+    fn get_sub_op(&self, root: &IdlModule) -> String {
         self.subop.into()
     }
-    fn get_op(&self) -> String {
+    fn get_op(&self, root: &IdlModule) -> String {
         self.op.into()
     }
 
-    fn get_c_type(&self) -> String {
+    fn get_c_type(&self, root: &IdlModule) -> String {
         self.ctype.into()
     }
 
-    fn get_xml(&self) -> String {
+    fn get_xml(&self, root: &IdlModule) -> String {
         String::from(format!("<{}/>", self.xml))
     }
 
-    fn get_key_size(&self) -> i32 {
+    fn get_key_size(&self, root: &IdlModule) -> i32 {
         match self.basic_type {
             BType::Boolean => 1,
             BType::String => -1,
@@ -203,13 +204,13 @@ impl Type for BasicType {
         }
     }
 
-    fn get_meta_op_size(&self) -> i32 {
+    fn get_meta_op_size(&self, root: &IdlModule) -> i32 {
         2
     }
-    fn get_alignment(&self) -> Alignment {
+    fn get_alignment(&self, root: &IdlModule) -> Alignment {
         self.align.clone()
     }
-    fn contains_union(&self) -> bool {
+    fn contains_union(&self, root: &IdlModule) -> bool {
         false
     }
 }

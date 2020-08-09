@@ -18,15 +18,22 @@ public interface Type
 }
 */
 use crate::c_generator::alignment::Alignment;
+use crate::IdlModule;
 
 pub trait Type {
-    fn get_meta_op(&self, name: &str, struct_name: &str, is_key_field: bool) -> String;
-    fn get_sub_op(&self) -> String;
-    fn get_op(&self) -> String;
-    fn get_c_type(&self) -> String;
-    fn get_xml(&self) -> String;
-    fn get_key_size(&self) -> i32;
-    fn get_meta_op_size(&self) -> i32;
-    fn get_alignment(&self) -> Alignment;
-    fn contains_union(&self) -> bool;
+    fn get_meta_op(
+        &self,
+        name: &str,
+        struct_name: &str,
+        is_key_field: bool,
+        root: &IdlModule,
+    ) -> String;
+    fn get_sub_op(&self, root: &IdlModule) -> String;
+    fn get_op(&self, root: &IdlModule) -> String;
+    fn get_c_type(&self, root: &IdlModule) -> String;
+    fn get_xml(&self, root: &IdlModule) -> String;
+    fn get_key_size(&self, root: &IdlModule) -> i32;
+    fn get_meta_op_size(&self, root: &IdlModule) -> i32;
+    fn get_alignment(&self, root: &IdlModule) -> Alignment;
+    fn contains_union(&self, root: &IdlModule) -> bool;
 }
