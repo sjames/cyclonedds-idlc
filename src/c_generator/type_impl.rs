@@ -69,6 +69,32 @@ lazy_static! {
     static ref STRING: BasicType = BasicType::new_string();
 }
 
+fn get_meta_op_complex(
+    spec: &IdlTypeSpec,
+    name: &str,
+    struct_name: &str,
+    is_key: bool,
+    root: &IdlModule,
+) -> String {
+    match spec {
+        IdlTypeSpec::SequenceType(typespec, values) => String::from(format!(
+            "DDS_OP_ADR | DDS_OP_TYPE_SEQ | {} {} , offsetof!({},{}) as u32",
+            typespec.get_sub_op(root),
+            if is_key { " | DDS_OP_FLAG_KEY" } else { "" },
+            struct_name,
+            name
+        )),
+        IdlTypeSpec::ArrayType(typespec, values) => String::from(format!(
+            "DDS_OP_ADR | DDS_OP_TYPE_ARR | {} {} , offsetof!({},{}) as u32",
+            typespec.get_sub_op(root),
+            if is_key { " | DDS_OP_FLAG_KEY" } else { "" },
+            struct_name,
+            name
+        )),
+        _ => String::from("UNIMPLEMENTED"),
+    }
+}
+
 impl Type for IdlTypeSpec {
     fn get_meta_op(
         &self,
@@ -78,9 +104,15 @@ impl Type for IdlTypeSpec {
         root: &IdlModule,
     ) -> String {
         match self {
-            IdlTypeSpec::ArrayType(_typespec, _values) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::SequenceType(_typespec, _value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::StringType(_value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ArrayType(typespec, _values) => {
+                get_meta_op_complex(self, name, struct_name, is_key_field, root)
+            }
+            IdlTypeSpec::SequenceType(typespec, _value) => {
+                get_meta_op_complex(self, name, struct_name, is_key_field, root)
+            }
+            IdlTypeSpec::StringType(_value) => {
+                STRING.get_meta_op(name, struct_name, is_key_field, root)
+            }
             IdlTypeSpec::WideStringType(_value) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::F32Type => FLOAT.get_meta_op(name, struct_name, is_key_field, root),
             IdlTypeSpec::F64Type => DOUBLE.get_meta_op(name, struct_name, is_key_field, root),
@@ -103,7 +135,7 @@ impl Type for IdlTypeSpec {
         match self {
             IdlTypeSpec::ArrayType(_typespec, _values) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::SequenceType(_typespec, _value) => String::from("NOT IMPLEMENTED"),
-            IdlTypeSpec::StringType(_value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::StringType(_value) => STRING.get_sub_op(root),
             IdlTypeSpec::WideStringType(_value) => String::from("NOT IMPLEMENTED"),
             IdlTypeSpec::F32Type => FLOAT.get_sub_op(root),
             IdlTypeSpec::F64Type => DOUBLE.get_sub_op(root),
@@ -122,6 +154,8 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::None => panic!("Unexpected get_meta_op for IdlTypeSpec::None"),
         }
     }
+
+    //DDS_OP_ADR | DDS_OP_TYPE_SEQ | DDS_OP_SUBTYPE_STR, offsetof (TestData_Msg, sequence_field),
     fn get_op(&self, root: &IdlModule) -> String {
         match self {
             IdlTypeSpec::ArrayType(_typespec, _values) => String::from("NOT IMPLEMENTED"),

@@ -499,6 +499,114 @@ impl IdlTypeDcl {
                         "{",
                         indent = level * INDENTION
                     );
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}pub fn descriptor() -> Pin<Box<{}_desc>> {}",
+                        "",
+                        id,
+                        "{",
+                        indent = (level + 1) * INDENTION
+                    );
+
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}let mut res = {}_desc {{",
+                        "",
+                        id,
+                        indent = (level + 2) * INDENTION
+                    );
+
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}key_descriptor : [",
+                        "",
+                        indent = (level + 3) * INDENTION
+                    );
+                    let mut offset = 0;
+                    for k in type_spec.iter() {
+                        if k.is_key {
+                            let _ = writeln!(
+                                out,
+                                "{:indent$}dds_key_descriptor {{",
+                                "",
+                                indent = (level + 4) * INDENTION
+                            );
+                            let _ = writeln!(out, "{:indent$}m_name : unsafe {{ std::ffi::CStr::from_bytes_with_nul_unchecked(b\"{}\\0\").as_ptr()}},", "", k.id, indent = (level+5) * INDENTION);
+                            let _ = writeln!(
+                                out,
+                                "{:indent$}m_index : {},",
+                                "",
+                                offset,
+                                indent = (level + 5) * INDENTION
+                            );
+                            let _ = writeln!(
+                                out,
+                                "{:indent$}}},",
+                                "",
+                                indent = (level + 4) * INDENTION
+                            );
+                        }
+                        offset = offset + k.type_spec.get_meta_op_size(root);
+                    }
+                    //end of key_descriptor
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}{}",
+                        "",
+                        "],",
+                        indent = (level + 3) * INDENTION
+                    );
+
+                    //Begin ops
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}ops : [",
+                        "",
+                        indent = (level + 3) * INDENTION
+                    );
+
+                    for m in type_spec.iter() {
+                        let _ = writeln!(
+                            out,
+                            "{:indent$}{},",
+                            "",
+                            m.type_spec.get_meta_op(&m.id, &id, m.is_key, root),
+                            indent = (level + 5) * INDENTION
+                        );
+                    }
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}{}",
+                        "",
+                        "DDS_OP_RTS,",
+                        indent = (level + 5) * INDENTION
+                    );
+                    //DDS_OP_RTS
+                    //end ops
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}{}",
+                        "",
+                        "],",
+                        indent = (level + 3) * INDENTION
+                    );
+
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}{}",
+                        "",
+                        "};",
+                        indent = (level + 2) * INDENTION
+                    );
+
+                    // end of descriptor()
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}{}",
+                        "",
+                        "}",
+                        indent = (level + 1) * INDENTION
+                    );
 
                     let _ = writeln!(out, "{:indent$}{}", "", "}", indent = level * INDENTION);
                 }
