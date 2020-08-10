@@ -1,3 +1,8 @@
+// Copyright (C) 2020  Sojan James
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0>
+
 use crate::{IdlModule, IdlStructMember, IdlTypeDcl, IdlTypeDclKind, IdlTypeSpec};
 
 use std::io::Error;

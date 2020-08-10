@@ -1,3 +1,8 @@
+// Copyright (C) 2020  Sojan James
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0>
+
 /*
 BOOLEAN ("bool", "DDS_OP_TYPE_BOO", "DDS_OP_SUBTYPE_BOO", Alignment.BOOL, "Boolean"),
 OCTET ("uint8_t", "DDS_OP_TYPE_1BY", "DDS_OP_SUBTYPE_1BY", Alignment.ONE, "Octet"),

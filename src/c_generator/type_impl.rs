@@ -1,3 +1,8 @@
+// Copyright (C) 2020  Sojan James
+//
+// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
+// http://www.apache.org/licenses/LICENSE-2.0>
+
 use crate::c_generator::alignment::{Alignment, AlignmentType};
 use crate::c_generator::basic_types::BasicType;
 use crate::c_generator::type_trait::Type;
