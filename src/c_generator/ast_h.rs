@@ -156,7 +156,7 @@ impl IdlStructMember {
             IdlTypeSpec::ScopedName(name) => {
                 let is_absolute_path = name.1;
                 if !is_absolute_path {
-                    out.write(&scope.join("_").as_bytes())?;
+                    out.write_all(&scope.join("_").as_bytes())?;
                     write!(out, "_")?;
                 }
                 self.type_spec.write_h(out, root)?;

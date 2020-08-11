@@ -341,7 +341,7 @@ impl Type for IdlTypeSpec {
 
 impl IdlTypeSpec {
     pub fn write_h<W: Write>(&self, out: &mut W, root: &IdlModule) -> Result<(), Error> {
-        out.write(self.get_c_type(root).as_bytes())?;
+        out.write_all(self.get_c_type(root).as_bytes())?;
 
         Ok(())
     }
