@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{Error, ErrorKind};
 use std::io::{Read, Write};
-
+use std::include;
 use std::path::PathBuf;
 
 use crate::ast::*;
@@ -877,6 +877,8 @@ pub fn generate_with_loader<W: Write, L: IdlLoader>(
             .map_err(|e| IdlError::ErrorMesg(e.to_string()))
     } else {
         let _ = out.write(MODULE_PRELUDE);
+        let USE_CYCLONEDDS_SYS = include_str!("templates/use_cyclonedds.txt");
+        let _ = out.write(USE_CYCLONEDDS_SYS.as_bytes());
         ctx.root_module
             .write(out, 0, &ctx.root_module)
             .map_err(|_| IdlError::InternalError)

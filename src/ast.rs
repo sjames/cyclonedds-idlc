@@ -28,6 +28,7 @@ const IMPORT_SERDE: &str = "use serde_derive::{Serialize, Deserialize};";
 const ATTR_ALLOW_UNUSED_IMPORTS: &str = "#[allow(unused_imports)]";
 const ATTR_REPL_C: &str = "#[repr(C)]";
 
+
 impl UnaryOp {
     pub fn write<W: Write>(&self, out: &mut W) -> Result<(), Error> {
         let _ = match self {
@@ -575,20 +576,6 @@ impl IdlTypeDcl {
                             indent = (level + 5) * INDENTION
                         );
                     }
-
-                    /*
-                    for m in type_spec.iter() {
-                        let _ = writeln!(
-                            out,
-                            "{:indent$}{},",
-                            "",
-                            m.type_spec.get_meta_op(&m.id, &id, m.is_key, root)[0],
-                            indent = (level + 5) * INDENTION
-                        );
-                    }
-                    */
-                
-                    
                     //end ops
                     let _ = writeln!(
                         out,
@@ -600,9 +587,98 @@ impl IdlTypeDcl {
 
                     let _ = writeln!(
                         out,
+                        "{:indent$}descriptor : dds_topic_descriptor {{",
+                        "",
+                        indent = (level + 3) * INDENTION
+                    );
+
+                    let _ = writeln!(out,"{:indent$}m_size : std::mem::size_of::<{}>() as u32,",
+                        "",
+                        id,
+                        indent = (level + 4) * INDENTION
+                    );
+                    let _ = writeln!(out,"{:indent$}m_align: std::mem::size_of::<*const u8>() as u32,",
+                        "",
+                        indent = (level + 4) * INDENTION
+                    );
+                    let _ = writeln!(out,"{:indent$}m_flagset: DDS_TOPIC_NO_OPTIMIZE | TBD_DDS_TOPIC_FIXED_KEY,",
+                    "",
+                    indent = (level + 4) * INDENTION
+                    );
+                    let _ = writeln!(out,"{:indent$}m_nkeys: {},",
+                    "",
+                    num_keys,
+                    indent = (level + 4) * INDENTION
+                    );
+                    let _ = writeln!(out,"{:indent$}m_typename: {},",
+                    "",
+                    "<<<TYPENAME>>>",
+                    indent = (level + 4) * INDENTION
+                    );
+                    let _ = writeln!(out,"{:indent$}m_keys: std::ptr::null(),",
+                    "",
+                    indent = (level + 4) * INDENTION
+                    );
+                    let _ = writeln!(out,"{:indent$}m_nops: {},",
+                    "",
+                    num_ops,
+                    indent = (level + 4) * INDENTION
+                    );
+                    let _ = writeln!(out,"{:indent$}m_ops: std::ptr::null(),",
+                    "",
+                    indent = (level + 4) * INDENTION
+                    );
+                    let _ = writeln!(out,"{:indent$}m_meta: {},",
+                    "",
+                    "<<METADATA>>",
+                    indent = (level + 4) * INDENTION
+                    );
+
+
+                      //end descriptor
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}}},",
+                        "",
+                        indent = (level + 3) * INDENTION
+                    );
+
+                    let _ = writeln!(
+                        out,
+                        "{:indent$}_pin : PhantomPinned,",
+                        "",
+                        indent = (level + 3) * INDENTION
+                    );
+
+                    //descriptor
+
+                    let _ = writeln!(
+                        out,
                         "{:indent$}{}",
                         "",
                         "};",
+                        indent = (level + 2) * INDENTION
+                    );
+
+                    /*
+                        let key_desc = res.key_descriptor.as_ptr();
+                        let ops = res.ops.as_ptr();
+
+                        res.descriptor.m_keys = key_desc;
+                        res.descriptor.m_ops = ops;
+
+                        let mut boxed = Box::pin(res);
+                        boxed
+                    */
+
+                    let _ = write!(
+                        out,"{:indent$}{};\n{:indent$}{};\n{:indent$}{}\n",
+                        "",
+                        "res.descriptor.m_keys = res.key_descriptor.as_ptr()",
+                        "",
+                        "res.descriptor.m_ops = res.ops.as_ptr()",
+                        "",
+                        "Box::pin(res)",
                         indent = (level + 2) * INDENTION
                     );
 
@@ -614,6 +690,23 @@ impl IdlTypeDcl {
                         "}",
                         indent = (level + 1) * INDENTION
                     );
+
+                    /*
+      pub fn desc(&self) -> * const dds_topic_descriptor {
+            &self.descriptor
+        }
+                    */
+                    let _ = write!(
+                        out,"{:indent$}{};\n{:indent$}{};\n{:indent$}{}\n",
+                        "",
+                        "pub fn desc(&self) -> * const dds_topic_descriptor {",
+                        "",
+                        "    &self.descriptor",
+                        "",
+                        "}",
+                        indent = (level + 1) * INDENTION
+                    );
+
 
                     let _ = writeln!(out, "{:indent$}{}", "", "}", indent = level * INDENTION);
                 }
@@ -904,6 +997,7 @@ impl IdlModule {
         };
 
         let add: usize = if self.id.is_some() { 1 } else { 0 };
+
 
         let _ = writeln!(
             out,
