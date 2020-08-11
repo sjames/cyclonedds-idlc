@@ -601,8 +601,11 @@ impl IdlTypeDcl {
                         "",
                         indent = (level + 4) * INDENTION
                     );
-                    let _ = writeln!(out,"{:indent$}m_flagset: DDS_TOPIC_NO_OPTIMIZE | TBD_DDS_TOPIC_FIXED_KEY,",
+                    //| TBD_DDS_TOPIC_FIXED_KEY
+
+                    let _ = writeln!(out,"{:indent$}m_flagset: DDS_TOPIC_NO_OPTIMIZE{},",
                     "",
+                    if num_keys > 0 && num_keys <= 16 { " | DDS_TOPIC_FIXED_KEY"} else {""},
                     indent = (level + 4) * INDENTION
                     );
                     let _ = writeln!(out,"{:indent$}m_nkeys: {},",
