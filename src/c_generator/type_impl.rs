@@ -132,7 +132,24 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::WideCharType => vec![String::from("NOT IMPLEMENTED")],
             IdlTypeSpec::BooleanType => BOOLEAN.get_meta_op(name, struct_name, is_key_field, root),
             IdlTypeSpec::OctetType => OCTET.get_meta_op(name, struct_name, is_key_field, root),
-            IdlTypeSpec::ScopedName(_name) => vec![String::from("NOT IMPLEMENTED")],
+            IdlTypeSpec::ScopedName(scoped_name) => {
+                
+                if let Some(scoped_name_type) = root.get_type_decl(&scoped_name) {
+                    let mut meta_ops = Vec::new();
+                    match &scoped_name_type.0 {
+                        IdlTypeDclKind::StructDcl(id, members, is_key) => {
+                            for m in members {
+                                let field_name = format!("{}.{}",name,m.id);
+                                meta_ops.append(&mut m.type_spec.get_meta_op(&field_name,struct_name,*is_key,root))
+                            }
+                        }
+                        _ => panic!("Only structs supported in ScopedName")
+                    }
+                    meta_ops
+                } else {
+                    panic!("Unable to determine type of scoped name:{:?}",name);
+                }
+            },
             IdlTypeSpec::None => panic!("Unexpected get_meta_op for IdlTypeSpec::None"),
         }
     }
@@ -387,16 +404,16 @@ impl Type for IdlTypeDcl {
             IdlTypeDclKind::StructDcl(id,members,is_key) => {
                 for m in members {
                     match *m.type_spec {
-                        IdlTypeSpec::ScopedName(ref name) => {println!("Scoped name:{:?}",name)}
+                        IdlTypeSpec::ScopedName(ref name) => meta_ops.append( &mut m.type_spec.get_meta_op(&m.id,&id,m.is_key,root)),
                         _ => meta_ops.append( &mut m.type_spec.get_meta_op(&m.id,&id,m.is_key,root))
+                    }
                 }
-                }
-
+                meta_ops.append(&mut vec![String::from("DDS_OP_RTS")]);
             }
             _ => panic!("Unsupported IdlTypeDeclKind")
         }
 
-        meta_ops.append(&mut vec![String::from("DDS_OP_RTS")]);
+        
         meta_ops
     }
     fn get_sub_op(&self, root: &IdlModule) -> String {
