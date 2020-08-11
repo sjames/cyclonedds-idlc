@@ -566,23 +566,29 @@ impl IdlTypeDcl {
                         indent = (level + 3) * INDENTION
                     );
 
+                    for op in self.get_meta_op("","",false,root) {
+                        let _ = writeln!(
+                            out,
+                            "{:indent$}{},",
+                            "",
+                            op,
+                            indent = (level + 5) * INDENTION
+                        );
+                    }
+
+                    /*
                     for m in type_spec.iter() {
                         let _ = writeln!(
                             out,
                             "{:indent$}{},",
                             "",
-                            m.type_spec.get_meta_op(&m.id, &id, m.is_key, root),
+                            m.type_spec.get_meta_op(&m.id, &id, m.is_key, root)[0],
                             indent = (level + 5) * INDENTION
                         );
                     }
-                    let _ = writeln!(
-                        out,
-                        "{:indent$}{}",
-                        "",
-                        "DDS_OP_RTS,",
-                        indent = (level + 5) * INDENTION
-                    );
-                    //DDS_OP_RTS
+                    */
+                
+                    
                     //end ops
                     let _ = writeln!(
                         out,

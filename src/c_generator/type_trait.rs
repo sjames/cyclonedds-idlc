@@ -32,7 +32,7 @@ pub trait Type {
         struct_name: &str,
         is_key_field: bool,
         root: &IdlModule,
-    ) -> String;
+    ) -> Vec<String>;
     fn get_sub_op(&self, root: &IdlModule) -> String;
     fn get_op(&self, root: &IdlModule) -> String;
     fn get_c_type(&self, root: &IdlModule) -> String;

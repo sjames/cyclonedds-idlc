@@ -6,7 +6,7 @@
 use crate::c_generator::alignment::{Alignment, AlignmentType};
 use crate::c_generator::basic_types::BasicType;
 use crate::c_generator::type_trait::Type;
-use crate::{IdlModule, IdlScopedName, IdlTypeDclKind, IdlTypeSpec};
+use crate::{IdlModule, IdlScopedName, IdlTypeDcl,IdlTypeDclKind, IdlTypeSpec};
 
 use std::io::Error;
 use std::io::Write;
@@ -80,23 +80,23 @@ fn get_meta_op_complex(
     struct_name: &str,
     is_key: bool,
     root: &IdlModule,
-) -> String {
+) -> Vec<String> {
     match spec {
-        IdlTypeSpec::SequenceType(typespec, values) => String::from(format!(
-            "DDS_OP_ADR | DDS_OP_TYPE_SEQ | {} {} , offsetof!({},{}) as u32",
+        IdlTypeSpec::SequenceType(typespec, values) => vec![String::from(format!(
+            "DDS_OP_ADR | DDS_OP_TYPE_SEQ | {}{} ,offsetof!({},{}) as u32",
             typespec.get_sub_op(root),
             if is_key { " | DDS_OP_FLAG_KEY" } else { "" },
             struct_name,
             name
-        )),
-        IdlTypeSpec::ArrayType(typespec, values) => String::from(format!(
-            "DDS_OP_ADR | DDS_OP_TYPE_ARR | {} {} , offsetof!({},{}) as u32",
+        ))],
+        IdlTypeSpec::ArrayType(typespec, values) => vec![String::from(format!(
+            "DDS_OP_ADR | DDS_OP_TYPE_ARR | {}{} ,offsetof!({},{}) as u32",
             typespec.get_sub_op(root),
             if is_key { " | DDS_OP_FLAG_KEY" } else { "" },
             struct_name,
             name
-        )),
-        _ => String::from("UNIMPLEMENTED"),
+        ))],
+        _ => vec![String::from("UNIMPLEMENTED")],
     }
 }
 
@@ -107,7 +107,7 @@ impl Type for IdlTypeSpec {
         struct_name: &str,
         is_key_field: bool,
         root: &IdlModule,
-    ) -> String {
+    ) -> Vec<String> {
         match self {
             IdlTypeSpec::ArrayType(typespec, _values) => {
                 get_meta_op_complex(self, name, struct_name, is_key_field, root)
@@ -118,10 +118,10 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::StringType(_value) => {
                 STRING.get_meta_op(name, struct_name, is_key_field, root)
             }
-            IdlTypeSpec::WideStringType(_value) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::WideStringType(_value) => vec![String::from("NOT IMPLEMENTED")],
             IdlTypeSpec::F32Type => FLOAT.get_meta_op(name, struct_name, is_key_field, root),
             IdlTypeSpec::F64Type => DOUBLE.get_meta_op(name, struct_name, is_key_field, root),
-            IdlTypeSpec::F128Type => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::F128Type => vec![String::from("NOT IMPLEMENTED")],
             IdlTypeSpec::I16Type => SHORT.get_meta_op(name, struct_name, is_key_field, root),
             IdlTypeSpec::I32Type => LONG.get_meta_op(name, struct_name, is_key_field, root),
             IdlTypeSpec::I64Type => LONGLONG.get_meta_op(name, struct_name, is_key_field, root),
@@ -129,10 +129,10 @@ impl Type for IdlTypeSpec {
             IdlTypeSpec::U32Type => ULONG.get_meta_op(name, struct_name, is_key_field, root),
             IdlTypeSpec::U64Type => ULONGLONG.get_meta_op(name, struct_name, is_key_field, root),
             IdlTypeSpec::CharType => CHAR.get_meta_op(name, struct_name, is_key_field, root),
-            IdlTypeSpec::WideCharType => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::WideCharType => vec![String::from("NOT IMPLEMENTED")],
             IdlTypeSpec::BooleanType => BOOLEAN.get_meta_op(name, struct_name, is_key_field, root),
             IdlTypeSpec::OctetType => OCTET.get_meta_op(name, struct_name, is_key_field, root),
-            IdlTypeSpec::ScopedName(_name) => String::from("NOT IMPLEMENTED"),
+            IdlTypeSpec::ScopedName(_name) => vec![String::from("NOT IMPLEMENTED")],
             IdlTypeSpec::None => panic!("Unexpected get_meta_op for IdlTypeSpec::None"),
         }
     }
@@ -337,7 +337,7 @@ impl Type for IdlScopedName {
         struct_name: &str,
         is_key_field: bool,
         root: &IdlModule,
-    ) -> String {
+    ) -> Vec<String> {
         panic!("Unimplemented");
     }
     fn get_sub_op(&self, root: &IdlModule) -> String {
@@ -370,28 +370,57 @@ impl Type for IdlScopedName {
     fn contains_union(&self, root: &IdlModule) -> bool {
         panic!("Unimplemented");
     }
-    /*
-        pub fn write_h<W: Write>(&self, out: &mut W) -> Result<(), Error> {
-            let is_absolute_path = self.1;
+}
 
-            let components = &self.0;
 
-            let name = components.join("_");
-            let _ = write!(out, "{}", name);
-    /*
-            for (idx, comp) in components.iter().enumerate() {
-                // TODO, use paths according to "crate::" or "super::"
-                if idx == 0 && !is_absolute_path {
-                    let _ = write!(out, "{}", comp);
-                } else if idx == 0 && is_absolute_path {
-                    let _ = write!(out, "crate::{}", comp);
-                } else {
-                    let _ = write!(out, "::{}", comp);
+impl Type for IdlTypeDcl {
+    fn get_meta_op(
+        &self,
+        name: &str,
+        struct_name: &str,
+        is_key_field: bool,
+        root: &IdlModule,
+    ) -> Vec<String> {
+
+        let mut meta_ops = Vec::new();
+        match &self.0 {
+            IdlTypeDclKind::StructDcl(id,members,is_key) => {
+                for m in members {
+                    match *m.type_spec {
+                        IdlTypeSpec::ScopedName(ref name) => {println!("Scoped name:{:?}",name)}
+                        _ => meta_ops.append( &mut m.type_spec.get_meta_op(&m.id,&id,m.is_key,root))
                 }
-            }
-            */
-            Ok(())
+                }
 
+            }
+            _ => panic!("Unsupported IdlTypeDeclKind")
         }
-        */
+
+        meta_ops.append(&mut vec![String::from("DDS_OP_RTS")]);
+        meta_ops
+    }
+    fn get_sub_op(&self, root: &IdlModule) -> String {
+        panic!("Unimplemented");
+    }
+    fn get_op(&self, root: &IdlModule) -> String {
+        panic!("Unimplemented");
+    }
+    fn get_c_type(&self, root: &IdlModule) -> String {
+        String::from("UNIMPLEMENTED")
+    }
+    fn get_xml(&self, root: &IdlModule) -> String {
+        panic!("Unimplemented");
+    }
+    fn get_key_size(&self, root: &IdlModule) -> i32 {
+        panic!("Unimplemented");
+    }
+    fn get_meta_op_size(&self, root: &IdlModule) -> i32 {
+        panic!("Unimplemented");
+    }
+    fn get_alignment(&self, root: &IdlModule) -> Alignment {
+        panic!("Unimplemented");
+    }
+    fn contains_union(&self, root: &IdlModule) -> bool {
+        panic!("Unimplemented");
+    }
 }

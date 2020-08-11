@@ -177,14 +177,14 @@ impl BasicType {
 }
 
 impl Type for BasicType {
-    fn get_meta_op(&self, name: &str, struct_name: &str, is_key: bool, root: &IdlModule) -> String {
-        String::from(format!(
+    fn get_meta_op(&self, name: &str, struct_name: &str, is_key: bool, root: &IdlModule) -> Vec<String> {
+        vec![String::from(format!(
             "DDS_OP_ADR | {} {} , offsetof!({},{}) as u32",
             self.op,
             if is_key { " | DDS_OP_FLAG_KEY" } else { "" },
             struct_name,
             name
-        ))
+        ))]
     }
     /*
     fn get_meta_op_c(&self, name: &str, struct_name: &str, is_key: bool, root: &IdlModule) -> String {
