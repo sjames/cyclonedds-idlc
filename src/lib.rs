@@ -98,7 +98,7 @@ impl<'i> Context<'i> {
         Context {
             config: &config,
             definitions: HashMap::default(),
-            root_module: Box::new(IdlModule::new(None, 0)),
+            root_module: Box::new(IdlModule::new(None, 0,Vec::new())),
         }
     }
 
@@ -107,12 +107,15 @@ impl<'i> Context<'i> {
         // Starting from Root traverse the scope-path
         let mut current_module = &mut self.root_module;
         let level = scope.len();
-
+        let mut submodule_scope = Vec::new();
+        //println!("Lookup module: scope:{:?}",&scope);
         for name in scope {
+            submodule_scope.push(name.clone());
+            
             let submodule = current_module
                 .modules
                 .entry(name.to_owned())
-                .or_insert(Box::new(IdlModule::new(Some(name.to_owned()), level)));
+                .or_insert(Box::new(IdlModule::new(Some(name.to_owned()),level, submodule_scope.clone())));
             current_module = submodule;
         }
 
@@ -880,7 +883,7 @@ pub fn generate_with_loader<W: Write, L: IdlLoader>(
         let USE_CYCLONEDDS_SYS = include_str!("templates/use_cyclonedds.txt");
         let _ = out.write(USE_CYCLONEDDS_SYS.as_bytes());
         ctx.root_module
-            .write(out, 0, &ctx.root_module)
+            .write(out, 0, &ctx.root_module,&Vec::new())
             .map_err(|_| IdlError::InternalError)
     }
 }

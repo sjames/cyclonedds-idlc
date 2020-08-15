@@ -344,6 +344,17 @@ impl Default for IdlTypeDclKind {
     }
 }
 
+// create typename from scope and name
+fn scope_to_name(scope:&Vec<String>, typename:&str) -> String {
+    let mut name = scope.join("::");
+    if name.len() > 0 {
+        format!("{}::{}",name,typename)
+    } else {
+        String::from(typename)
+    }
+    
+}
+
 ///
 #[derive(Clone, Debug, Default)]
 pub struct IdlTypeDcl(pub IdlTypeDclKind);
@@ -357,6 +368,7 @@ impl IdlTypeDcl {
         out: &mut W,
         level: usize,
         root: &IdlModule,
+        scope :&Vec<String>,
     ) -> Result<(), Error> {
         match self.0 {
             IdlTypeDclKind::TypeDcl(ref id, ref type_spec) => {
@@ -613,9 +625,10 @@ impl IdlTypeDcl {
                     num_keys,
                     indent = (level + 4) * INDENTION
                     );
-                    let _ = writeln!(out,"{:indent$}m_typename: {},",
+
+                    let _ = writeln!(out,"{:indent$}m_typename: unsafe {{std::ffi::CStr::from_bytes_with_nul_unchecked(b\"{}\\0\").as_ptr()}},",
                     "",
-                    "<<<TYPENAME>>>",
+                    scope_to_name(scope,id),
                     indent = (level + 4) * INDENTION
                     );
                     let _ = writeln!(out,"{:indent$}m_keys: std::ptr::null(),",
@@ -888,12 +901,16 @@ pub struct IdlModule {
     pub types: LinkedHashMap<String, Box<IdlTypeDcl>>,
     pub constants: LinkedHashMap<String, Box<IdlConstDcl>>,
     // vector of (type_name, Vec<Keys>)
+    // TODO: This is not needed anymore.
     pub keys: Vec<(String, Vec<String>)>,
+    // Scope of this module
+    pub scope : Vec<String>
+      
 }
 
 ///
 impl IdlModule {
-    pub fn new(id: Option<String>, level: usize) -> IdlModule {
+    pub fn new(id: Option<String>, level: usize, scope:Vec<String>) -> IdlModule {
         IdlModule {
             id: id,
             level: level,
@@ -901,6 +918,7 @@ impl IdlModule {
             types: LinkedHashMap::default(),
             constants: LinkedHashMap::default(),
             keys: Vec::new(),
+            scope : Vec::new(),
         }
     }
 
@@ -976,15 +994,23 @@ impl IdlModule {
         out: &mut W,
         level: usize,
         root: &IdlModule,
+        scope : &Vec<String>,
     ) -> Result<(), Error> {
+
+        let mut scope = scope.clone();
+
         let _prolog = match self.id {
-            Some(ref id_str) => writeln!(
+            Some(ref id_str) => { 
+                
+                scope.push(String::from(id_str));
+
+                writeln!(
                 out,
                 "{:indent$}{}",
                 "",
                 ATTR_ALLOW_NON_SNAKE_CASE,
                 indent = level * INDENTION
-            )
+            )}
             .and_then(|_| {
                 writeln!(
                     out,
@@ -1013,11 +1039,11 @@ impl IdlModule {
         //                       IMPORT_SERDE, indent = (level + add) * INDENTION));
 
         for (_, typ) in self.types.iter() {
-            typ.write(out, level + add, root)?;
+            typ.write(out, level + add, root, &scope)?;
         }
 
         for (_, module) in self.modules.iter() {
-            module.write(out, level + add, root)?;
+            module.write(out, level + add, root,&scope)?;
         }
 
         for (_, cnst) in self.constants.iter() {
@@ -1032,3 +1058,4 @@ impl IdlModule {
         Ok(())
     }
 }
+
