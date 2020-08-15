@@ -903,14 +903,12 @@ pub struct IdlModule {
     // vector of (type_name, Vec<Keys>)
     // TODO: This is not needed anymore.
     pub keys: Vec<(String, Vec<String>)>,
-    // Scope of this module
-    pub scope : Vec<String>
       
 }
 
 ///
 impl IdlModule {
-    pub fn new(id: Option<String>, level: usize, scope:Vec<String>) -> IdlModule {
+    pub fn new(id: Option<String>, level: usize) -> IdlModule {
         IdlModule {
             id: id,
             level: level,
@@ -918,7 +916,6 @@ impl IdlModule {
             types: LinkedHashMap::default(),
             constants: LinkedHashMap::default(),
             keys: Vec::new(),
-            scope : Vec::new(),
         }
     }
 

@@ -98,7 +98,7 @@ impl<'i> Context<'i> {
         Context {
             config: &config,
             definitions: HashMap::default(),
-            root_module: Box::new(IdlModule::new(None, 0,Vec::new())),
+            root_module: Box::new(IdlModule::new(None, 0)),
         }
     }
 
@@ -115,7 +115,7 @@ impl<'i> Context<'i> {
             let submodule = current_module
                 .modules
                 .entry(name.to_owned())
-                .or_insert(Box::new(IdlModule::new(Some(name.to_owned()),level, submodule_scope.clone())));
+                .or_insert(Box::new(IdlModule::new(Some(name.to_owned()),level)));
             current_module = submodule;
         }
 
