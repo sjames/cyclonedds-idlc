@@ -1,4 +1,5 @@
 use cyclonedds_sys::{
+    DDSGenType,
     dds_stream_opcode_DDS_OP_ADR as DDS_OP_ADR,
     dds_stream_opcode_DDS_OP_JEQ as DDS_OP_JEQ, dds_stream_opcode_DDS_OP_JSR as DDS_OP_JSR,
     dds_stream_opcode_DDS_OP_RTS as DDS_OP_RTS,

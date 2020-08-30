@@ -887,7 +887,7 @@ pub fn generate_with_loader<W: Write, L: IdlLoader>(
         let USE_CYCLONEDDS_SYS = include_str!("templates/use_cyclonedds.txt");
         let _ = out.write(USE_CYCLONEDDS_SYS.as_bytes());
         ctx.root_module
-            .write(out, 0, &ctx.root_module,&Vec::new())
+            .write(out, 0, &ctx.root_module,&Vec::new(), config.generate_descriptors)
             .map_err(|_| IdlError::InternalError)
     }
 }
