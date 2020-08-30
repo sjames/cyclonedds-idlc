@@ -1,5 +1,6 @@
 use cyclonedds_sys::{
     DDSGenType,
+    /*
     dds_stream_opcode_DDS_OP_ADR as DDS_OP_ADR,
     dds_stream_opcode_DDS_OP_JEQ as DDS_OP_JEQ, dds_stream_opcode_DDS_OP_JSR as DDS_OP_JSR,
     dds_stream_opcode_DDS_OP_RTS as DDS_OP_RTS,
@@ -33,6 +34,7 @@ use cyclonedds_sys::{
     dds_stream_typecode_subtype_DDS_OP_SUBTYPE_STR as DDS_OP_SUBTYPE_STR,
     dds_stream_typecode_subtype_DDS_OP_SUBTYPE_STU as DDS_OP_SUBTYPE_STU,
     dds_stream_typecode_subtype_DDS_OP_SUBTYPE_UNI as DDS_OP_SUBTYPE_UNI, 
+    */
     dds_topic_descriptor,
     dds_key_descriptor,
 };
