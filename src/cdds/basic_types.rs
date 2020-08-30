@@ -18,8 +18,8 @@ DOUBLE ("double", "DDS_OP_TYPE_8BY | DDS_OP_FLAG_FP", "DDS_OP_SUBTYPE_8BY | DDS_
 STRING ("char *", "DDS_OP_TYPE_STR", "DDS_OP_SUBTYPE_STR", Alignment.PTR, "String");
 */
 
-use crate::c_generator::alignment::{Alignment, AlignmentType};
-use crate::c_generator::type_trait::Type;
+use crate::cdds::alignment::{Alignment, AlignmentType};
+use crate::cdds::type_trait::Type;
 use crate::IdlModule;
 
 enum BType {

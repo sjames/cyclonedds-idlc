@@ -114,6 +114,7 @@ fn main() -> Result<(), std::io::Error> {
         matches.opt_present("v"),
         matches.opt_present("c"),
         fullname.to_path_buf(),
+        false,
     );
 
     let result = match matches.opt_str("o") {

@@ -6,7 +6,7 @@
 extern crate linked_hash_map;
 
 mod ast;
-mod c_generator;
+mod cdds;
 
 use pest::iterators::{Pair, Pairs};
 use pest::Parser;
@@ -46,6 +46,7 @@ pub struct Configuration {
     pub verbose: bool,
     pub generate_c: bool,
     pub idl_name: PathBuf,
+    pub generate_descriptors : bool, // generate the descriptors in Rust
 }
 
 ///
@@ -55,12 +56,14 @@ impl Configuration {
         verbose: bool,
         gen_c: bool,
         idl_name: PathBuf,
+        generate_descriptors : bool,
     ) -> Configuration {
         Configuration {
             definition: defs,
             verbose: verbose,
             generate_c: gen_c,
             idl_name,
+            generate_descriptors,
         }
     }
 }
@@ -73,6 +76,7 @@ impl Default for Configuration {
             verbose: false,
             generate_c: false,
             idl_name: PathBuf::default(),
+            generate_descriptors : false,
         }
     }
 }
@@ -855,18 +859,18 @@ pub fn generate_with_loader<W: Write, L: IdlLoader>(
         let mut header_name = idlnamestem.clone();
         header_name.push_str(".h");
 
-        let file_header = std::include_str!("c_generator/templates/file_header.txt")
+        let file_header = std::include_str!("cdds/templates/file_header.txt")
             .replace("<FILENAME>", &header_name)
             .replace("<IDLNAME>", idlname)
             .replace(
                 "<HEADERDEFINE>",
-                &crate::c_generator::header_macro_name(&idlnamestem),
+                &crate::cdds::header_macro_name(&idlnamestem),
             );
         let _ = out.write(file_header.as_bytes());
 
-        let hfile_footer = std::include_str!("c_generator/templates/h_file_footer.txt").replace(
+        let hfile_footer = std::include_str!("cdds/templates/h_file_footer.txt").replace(
             "<HEADERDEFINE>",
-            &crate::c_generator::header_macro_name(&idlnamestem),
+            &crate::cdds::header_macro_name(&idlnamestem),
         );
 
         let scope = Vec::new();

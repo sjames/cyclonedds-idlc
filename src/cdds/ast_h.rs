@@ -8,8 +8,8 @@ use crate::{IdlModule, IdlStructMember, IdlTypeDcl, IdlTypeDclKind, IdlTypeSpec}
 use std::io::Error;
 use std::io::Write;
 
-use crate::c_generator::type_trait::Type;
-use crate::c_generator::{scoped_name, INDENTION};
+use crate::cdds::type_trait::Type;
+use crate::cdds::{scoped_name, INDENTION};
 
 impl IdlModule {
     // Write C header file

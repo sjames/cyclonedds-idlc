@@ -3,9 +3,9 @@
 // Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
 // http://www.apache.org/licenses/LICENSE-2.0>
 
-use crate::c_generator::alignment::{Alignment, AlignmentType};
-use crate::c_generator::basic_types::BasicType;
-use crate::c_generator::type_trait::Type;
+use crate::cdds::alignment::{Alignment, AlignmentType};
+use crate::cdds::basic_types::BasicType;
+use crate::cdds::type_trait::Type;
 use crate::{IdlModule, IdlScopedName, IdlTypeDcl,IdlTypeDclKind, IdlTypeSpec};
 
 use std::io::Error;

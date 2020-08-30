@@ -22,7 +22,7 @@ public interface Type
   public boolean containsUnion ();
 }
 */
-use crate::c_generator::alignment::Alignment;
+use crate::cdds::alignment::Alignment;
 use crate::IdlModule;
 
 pub trait Type {

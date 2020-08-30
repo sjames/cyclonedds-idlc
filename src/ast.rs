@@ -8,7 +8,7 @@ use linked_hash_map::LinkedHashMap;
 use std::io::Error;
 use std::io::Write;
 
-use crate::c_generator::type_trait::Type;
+use crate::cdds::type_trait::Type;
 
 ///
 #[derive(Clone, Debug)]
@@ -352,7 +352,11 @@ fn scope_to_name(scope:&Vec<String>, typename:&str) -> String {
     } else {
         String::from(typename)
     }
+}
+
+fn build_topic_xml_metadata(root:&IdlModule, typedecl : &IdlTypeDcl, scope:&Vec<String>) -> String {
     
+    String::from("<<METADADATA>>")
 }
 
 ///
@@ -644,9 +648,9 @@ impl IdlTypeDcl {
                     "",
                     indent = (level + 4) * INDENTION
                     );
-                    let _ = writeln!(out,"{:indent$}m_meta: {},",
+                    let _ = writeln!(out,"{:indent$}m_meta: unsafe {{std::ffi::CStr::from_bytes_with_nul_unchecked(b\"<MetaData version=\"1.0.0\">{}</MetaData>\\0\").as_ptr()}},",
                     "",
-                    "<<METADATA>>",
+                    //build_topic_xml_metadata(root),
                     indent = (level + 4) * INDENTION
                     );
 
