@@ -19,7 +19,7 @@ pub enum UnaryOp {
 }
 
 const INDENTION: usize = 4;
-const ATTR_ALLOW_DEADCODE: &str = "#[allow(dead_code)]";
+const ATTR_ALLOW_DEADCODE: &str = "pub use super::*;\n#[allow(dead_code)]";
 const ATTR_DERIVE_SERDE: &str = "#[derive(Serialize, Deserialize)]";
 const ATTR_DERIVE_CLONE_DEBUG: &str = "#[derive(Clone, Debug)]";
 const ATTR_ALLOW_NON_CAMEL_CASE_TYPES: &str = "#[allow(non_camel_case_types)]";
