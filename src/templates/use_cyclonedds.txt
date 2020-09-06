@@ -37,4 +37,5 @@ use cyclonedds_sys::{
     */
     dds_topic_descriptor,
     dds_key_descriptor,
+    dds_sequence_t,
 };
